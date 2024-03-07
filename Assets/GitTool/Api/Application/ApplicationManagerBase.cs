@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using SpoiledCat.Git;
 using Unity.Editor.Tasks;
 using Unity.Editor.Tasks.Logging;
+using UnityEngine;
 using static Unity.VersionControl.Git.GitInstaller;
 
 namespace Unity.VersionControl.Git
@@ -320,6 +321,11 @@ namespace Unity.VersionControl.Git
 
             repositoryManager?.Dispose();
 
+            if (!string.IsNullOrEmpty(ApplicationConfiguration.WorkDir))
+            {
+                Environment.RepositoryPath = new SPath(ApplicationConfiguration.WorkDir);
+            }
+            
             repositoryManager = Unity.VersionControl.Git.RepositoryManager.CreateInstance(Platform, TaskManager, GitClient, Environment.RepositoryPath);
 
             Environment.SubModulePaths = repositoryManager.Config.GetSubmodules();
@@ -329,6 +335,7 @@ namespace Unity.VersionControl.Git
             repositoryManager.Start();
             Environment.Repository.Start();
             Logger.Trace($"Got a repository? {Environment.Repository?.LocalPath ?? "null"}");
+            Debug.Log($"RepositoryPath Final: {Environment.RepositoryPath}");
         }
 
         public virtual void InitializeUI()

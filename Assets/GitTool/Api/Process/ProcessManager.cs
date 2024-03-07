@@ -35,11 +35,6 @@ namespace Unity.VersionControl.Git
                 workingDirectory = GitEnvironment.RepositoryPath;
             }
 
-            if (!string.IsNullOrEmpty(ApplicationConfiguration.WorkDir))
-            {
-                workingDirectory = ApplicationConfiguration.WorkDir.Trim();
-            }
-
             return base.Configure(processTask, workingDirectory);
         }
 

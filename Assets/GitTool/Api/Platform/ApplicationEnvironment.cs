@@ -78,7 +78,12 @@ namespace Unity.VersionControl.Git
             if (expectedRepositoryPath.Exists(".git"))
             {
                 SPath.FileSystem = new FileSystem(expectedRepositoryPath);
+                
                 RepositoryPath = expectedRepositoryPath;
+                if (!string.IsNullOrEmpty(ApplicationConfiguration.WorkDir))
+                {
+                    RepositoryPath = new SPath(ApplicationConfiguration.WorkDir);
+                }
                 Repository = new Repository(RepositoryPath, CacheContainer);
             }
         }

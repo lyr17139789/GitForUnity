@@ -14,6 +14,7 @@ namespace Unity.VersionControl.Git.UI
 
         private const string GitRepositoryRemoteLabel = "Remote";
         private const string RepositoryDirLabel = "WorkDir";
+        private const string RepositoryDirSave = "Save WorkDir";
         private const string GitRepositorySave = "Save Repository";
 
         private const string GeneralSettingsTitle = "General";
@@ -31,20 +32,44 @@ namespace Unity.VersionControl.Git.UI
         private const string HierarchyIconsIndentToggleLabel = "Align to end of label";
         private const string HierarchyIconsIndentToggleTooltip = "You probably don't want this";
         private static GUIContent hierarchyIconsIndentToggleContent;
-        private static GUIContent HierarchyIconsIndentToggleContent => hierarchyIconsIndentToggleContent ?? (hierarchyIconsIndentToggleContent = new GUIContent(HierarchyIconsIndentToggleLabel, HierarchyIconsIndentToggleTooltip));
+
+        private static GUIContent HierarchyIconsIndentToggleContent => hierarchyIconsIndentToggleContent ??
+                                                                       (hierarchyIconsIndentToggleContent =
+                                                                           new GUIContent(
+                                                                               HierarchyIconsIndentToggleLabel,
+                                                                               HierarchyIconsIndentToggleTooltip));
 
         private const string HierarchyIconsOffsetLabel = "Offset";
-        private const string HierarchyIconsOffsetRightTooltip = "Offset from the right edge of the hierarchy window. Increase this value to move icons away from the edge.";
+
+        private const string HierarchyIconsOffsetRightTooltip =
+            "Offset from the right edge of the hierarchy window. Increase this value to move icons away from the edge.";
+
         private const string HierarchyIconsOffsetLeftTooltip = "Offset from the left edge of the hierarchy window.";
         private static GUIContent hierarchyIconsOffsetRightContent;
-        private static GUIContent HierarchyIconsOffsetRightContent => hierarchyIconsOffsetRightContent ?? (hierarchyIconsOffsetRightContent = new GUIContent(HierarchyIconsOffsetLabel, HierarchyIconsOffsetRightTooltip));
+
+        private static GUIContent HierarchyIconsOffsetRightContent => hierarchyIconsOffsetRightContent ??
+                                                                      (hierarchyIconsOffsetRightContent =
+                                                                          new GUIContent(HierarchyIconsOffsetLabel,
+                                                                              HierarchyIconsOffsetRightTooltip));
+
         private static GUIContent hierarchyIconsOffsetLeftContent;
-        private static GUIContent HierarchyIconsOffsetLeftContent => hierarchyIconsOffsetLeftContent ?? (hierarchyIconsOffsetLeftContent = new GUIContent(HierarchyIconsOffsetLabel, HierarchyIconsOffsetLeftTooltip));
+
+        private static GUIContent HierarchyIconsOffsetLeftContent => hierarchyIconsOffsetLeftContent ??
+                                                                     (hierarchyIconsOffsetLeftContent =
+                                                                         new GUIContent(HierarchyIconsOffsetLabel,
+                                                                             HierarchyIconsOffsetLeftTooltip));
 
         private const string HierarchyIconsAlignmentLabel = "Align icons to";
-        private const string HierarchyIconsAlignmentTooltip = "Align the icons to the left or right of the hiearchy entry. Note that the icons will visually overlap the scene object buttons when aligned on the left, but the buttons will still work.";
+
+        private const string HierarchyIconsAlignmentTooltip =
+            "Align the icons to the left or right of the hiearchy entry. Note that the icons will visually overlap the scene object buttons when aligned on the left, but the buttons will still work.";
+
         private static GUIContent hierarchyIconsAlignmentContent;
-        private static GUIContent HierarchyIconsAlignmentContent => hierarchyIconsAlignmentContent ?? (hierarchyIconsAlignmentContent = new GUIContent(HierarchyIconsAlignmentLabel, HierarchyIconsAlignmentTooltip));
+
+        private static GUIContent HierarchyIconsAlignmentContent => hierarchyIconsAlignmentContent ??
+                                                                    (hierarchyIconsAlignmentContent =
+                                                                        new GUIContent(HierarchyIconsAlignmentLabel,
+                                                                            HierarchyIconsAlignmentTooltip));
 
         private const string DefaultRepositoryRemoteName = "origin";
 
@@ -202,8 +227,11 @@ namespace Unity.VersionControl.Git.UI
             {
                 EditorGUI.BeginDisabledGroup(IsBusy);
                 {
-                    newRepositoryRemoteUrl = EditorGUILayout.TextField(GitRepositoryRemoteLabel + ": " + repositoryRemoteName, newRepositoryRemoteUrl);
-                    var needsSaving = newRepositoryRemoteUrl != repositoryRemoteUrl && !String.IsNullOrEmpty(newRepositoryRemoteUrl);
+                    newRepositoryRemoteUrl =
+                        EditorGUILayout.TextField(GitRepositoryRemoteLabel + ": " + repositoryRemoteName,
+                            newRepositoryRemoteUrl);
+                    var needsSaving = newRepositoryRemoteUrl != repositoryRemoteUrl &&
+                                      !String.IsNullOrEmpty(newRepositoryRemoteUrl);
 
                     EditorGUI.BeginDisabledGroup(!needsSaving);
                     {
@@ -251,12 +279,24 @@ namespace Unity.VersionControl.Git.UI
             customSettingsHidden = !Controls.FoldoutScope(!customSettingsHidden, CustomSettingsTitle, () =>
             {
                 Controls.DoControl(ApplicationConfiguration.WorkDir,
-                    value => EditorGUILayout.TextField(RepositoryDirLabel, value),
                     value =>
                     {
-                        ApplicationConfiguration.WorkDir = value;
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            value = EntryPoint.ApplicationManager.Environment.RepositoryPath;
+                        }
+
+                        return EditorGUILayout.TextField(RepositoryDirLabel, value);
+                    },
+                    value =>
+                    {
+                        ApplicationConfiguration.WorkDir = value.Trim();
                         Manager.UserSettings.Set(Constants.RepoWorkingDirKey, value);
                     });
+                if (GUILayout.Button(RepositoryDirSave, GUILayout.ExpandWidth(false)))
+                {
+                    EntryPoint.Restart();
+                }
             });
         }
 
@@ -298,7 +338,8 @@ namespace Unity.VersionControl.Git.UI
                     });
 
                 Controls.DoControl(ApplicationConfiguration.HierarchyIconsAlignment,
-                    value => (ApplicationConfiguration.HierarchyIconAlignment) EditorGUILayout.EnumPopup(HierarchyIconsAlignmentContent, value),
+                    value => (ApplicationConfiguration.HierarchyIconAlignment)EditorGUILayout.EnumPopup(
+                        HierarchyIconsAlignmentContent, value),
                     value =>
                     {
                         ApplicationConfiguration.HierarchyIconsAlignment = value;
@@ -306,7 +347,8 @@ namespace Unity.VersionControl.Git.UI
                         dirty = true;
                     });
 
-                if (ApplicationConfiguration.HierarchyIconsAlignment == ApplicationConfiguration.HierarchyIconAlignment.Right)
+                if (ApplicationConfiguration.HierarchyIconsAlignment ==
+                    ApplicationConfiguration.HierarchyIconAlignment.Right)
                 {
                     Controls.DoControl(ApplicationConfiguration.HierarchyIconsIndented,
                         value => EditorGUILayout.Toggle(HierarchyIconsIndentToggleContent, value),
