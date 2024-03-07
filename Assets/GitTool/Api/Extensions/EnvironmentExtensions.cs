@@ -25,7 +25,7 @@ namespace Unity.VersionControl.Git
 
             if (repositoryPath.IsChildOf(projectPath))
             {
-                throw new InvalidOperationException($"RepositoryPath:\"{repositoryPath}\" should not be child of ProjectPath:\"{projectPath}\"");
+                // throw new InvalidOperationException($"RepositoryPath:\"{repositoryPath}\" should not be child of ProjectPath:\"{projectPath}\"");
             }
 
             return projectPath.RelativeTo(repositoryPath).Combine(path);
